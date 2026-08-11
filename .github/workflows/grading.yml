@@ -5,6 +5,9 @@ on:
     branches:
       - '**'
 
+env:
+  JWT_SECRET: grading-secret-ci-stride
+
 jobs:
   grade:
     name: Testes funcionais + Scan Semgrep

@@ -152,16 +152,18 @@ router.post('/validate/email', (req: Request, res: Response) => {
 
 /**
  * [E]levation of Privilege — POST /api/reports/generate
- * Executa comando dinâmico a partir do body (RCE via child_process.exec).
+ * Usa o campo `type` do body dentro de child_process.exec (RCE).
+ * Correção esperada: whitelist de tipos + geração controlada, sem exec/eval.
  */
 router.post('/reports/generate', (req: Request, res: Response) => {
-  const { command } = req.body ?? {};
+  const { type } = req.body ?? {};
 
-  if (typeof command !== 'string' || command.trim().length === 0) {
-    return res.status(400).json({ error: 'command é obrigatório' });
+  if (typeof type !== 'string' || type.trim().length === 0) {
+    return res.status(400).json({ error: 'type é obrigatório' });
   }
 
-  exec(command, (error, stdout, stderr) => {
+  // Vulnerável de propósito: executa no shell com base no input do usuário
+  exec(`echo stride-ok-${type}`, (error, stdout, stderr) => {
     if (error) {
       return res.status(500).json({
         error: 'falha ao gerar relatório',

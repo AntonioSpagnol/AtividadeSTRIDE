@@ -11,3 +11,4 @@ coverage/
 .semgrep/
 .vscode/
 !.devcontainer/
+semgrep-grade.json

@@ -176,12 +176,10 @@ describe('Contrato funcional da API (antifraude)', () => {
   });
 
   describe('[E] POST /api/reports/generate', () => {
-    it('deve executar comando seguro e retornar output', async () => {
-      const safeCommand = process.platform === 'win32' ? 'echo stride-ok' : 'echo stride-ok';
-
+    it('deve gerar relatório para type=summary e retornar output', async () => {
       const res = await request(app)
         .post('/api/reports/generate')
-        .send({ command: safeCommand });
+        .send({ type: 'summary' });
 
       expect(res.status).toBe(200);
       expect(res.body).toEqual(
@@ -190,10 +188,10 @@ describe('Contrato funcional da API (antifraude)', () => {
           output: expect.any(String),
         })
       );
-      expect(res.body.output).toMatch(/stride-ok/);
+      expect(String(res.body.output).length).toBeGreaterThan(0);
     });
 
-    it('deve retornar 400 quando command estiver ausente', async () => {
+    it('deve retornar 400 quando type estiver ausente', async () => {
       const res = await request(app).post('/api/reports/generate').send({});
 
       expect(res.status).toBe(400);

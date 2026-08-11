@@ -53,10 +53,20 @@ npm run scan      # as falhas sumiram do Semgrep? (obrigatório)
 
 O ambiente já vem pronto. Não precisa instalar nada na sua máquina.
 
-1. Abra este repositório no GitHub.
-2. Clique em **Code → Codespaces → Create codespace on main**.
-3. Espere o Codespace abrir (ele roda `npm install` sozinho).
-4. No terminal, rode:
+### 1) Crie a sua cópia a partir do template
+
+1. Abra o repositório da atividade no GitHub.
+2. Clique em **Use this template** → **Create a new repository**.
+3. Marque o repositório como **Private** (recomendado).
+4. Crie com um nome claro, ex.: `AtividadeSTRIDE-SeuNome`.
+
+> Não faça só um fork “solto” se o botão de template estiver disponível — use **Use this template** para ter um repo seu, independente.
+
+### 2) Abra no Codespaces
+
+1. No **seu** repositório, clique em **Code → Codespaces → Create codespace on main**.
+2. Espere o Codespace abrir (ele roda `npm install` e instala o Semgrep sozinho).
+3. No terminal, rode:
 
 ```bash
 npm test
@@ -78,8 +88,7 @@ Depois das correções, os **dois** devem passar.
 | `npm run scan` | Procurar as falhas de segurança com Semgrep |
 | `npm run build` | Compilar o TypeScript (opcional) |
 
-> **Semgrep no Codespace/CI:** no GitHub Actions o Semgrep já é instalado.  
-> No Codespace, se `npm run scan` falhar por falta do binário, instale com: `pip install semgrep`.
+> No Codespace, `JWT_SECRET` já vem definido no ambiente. Se rodar fora do Codespace, use o arquivo `.env.example` como referência.
 
 ---
 
@@ -164,8 +173,17 @@ db.all(
 |---|---|
 | **Arquivo** | `src/routes.ts` |
 | **Rota** | `POST /api/reports/generate` |
-| **O problema** | A API pega `req.body.command` e roda com `child_process.exec()`. Isso é execução remota de código (RCE). |
-| **Como corrigir** | Remova `exec` / `eval` com input do usuário. Gere o “relatório” de forma controlada (ex.: tipos permitidos em uma lista/`switch`), **sem** chamar o shell. |
+| **O problema** | A API pega `req.body.type` e usa dentro de `child_process.exec()`. Isso é execução remota de código (RCE). |
+| **Como corrigir** | Remova `exec` / `eval`. Aceite apenas tipos permitidos (ex.: `summary`, `balance`) com uma lista/`switch` e devolva o relatório **sem** chamar o shell. Mantenha a resposta no formato `{ message: "relatório gerado", output: string }`. |
+
+Exemplo da ideia (contrato que os testes esperam):
+
+```ts
+const allowed = ['summary', 'balance'] as const;
+// se type não estiver na lista → 400
+// se type === 'summary' → output controlado (string não vazia)
+return res.status(200).json({ message: 'relatório gerado', output: '...' });
+```
 
 ---
 
@@ -221,7 +239,7 @@ Você pode escolher **uma** das opções abaixo:
 
 Mantenha o repo **privado** e adicione o professor como collaborator.
 
-1. Abra o **seu** repositório no GitHub (a cópia onde você fez as correções).
+1. Abra o **seu** repositório no GitHub (a cópia criada pelo template).
 2. Vá em **Settings** (Configurações).
 3. No menu lateral, clique em **Collaborators**  
    (em alguns layouts: **Collaborators and teams**).
@@ -268,9 +286,11 @@ Exemplo:
 ```text
 Nome: Maria Silva
 RA: 123456
-Repo: https://github.com/seu-usuario/AtividadeSTRIDE
+Repo: https://github.com/seu-usuario/AtividadeSTRIDE-MariaSilva
 Acesso: adicionei AntonioSpagnol como collaborator (convite enviado)
 ```
+
+O professor vai clonar o seu repo e rodar a correção automática (`npm test` + scan Semgrep com nota por critério STRIDE).
 
 ---
 
@@ -300,6 +320,7 @@ tests/
 semgrep.yml                 → regras que o scan usa
 .github/workflows/grading.yml → CI automático no push
 .devcontainer/              → configuração do Codespaces
+scripts/grade-submission.*  → correção automática (professor)
 ```
 
 ---
@@ -311,7 +332,34 @@ semgrep.yml                 → regras que o scan usa
 3. **Catch:** logue o erro; responda mensagem genérica.
 4. **Erro 500:** sem `stack` na resposta HTTP.
 5. **E-mail:** evite regex com `(algo+)+`.
-6. **Relatório:** whitelist de tipos; nunca `exec(req.body...)`.
+6. **Relatório:** whitelist de tipos (`summary` / `balance`); nunca `exec(req.body...)`.
+
+---
+
+## Para o professor (correção automática)
+
+Com o link do repo do aluno:
+
+```powershell
+# Windows (PowerShell)
+.\scripts\grade-submission.ps1 -RepoUrl "https://github.com/aluno/AtividadeSTRIDE-Nome"
+
+# ou pasta já clonada
+.\scripts\grade-submission.ps1 -Path "C:\caminho\para\repo-do-aluno"
+```
+
+```bash
+# Linux / macOS / Codespace
+chmod +x scripts/grade-submission.sh
+./scripts/grade-submission.sh https://github.com/aluno/AtividadeSTRIDE-Nome
+# ou
+./scripts/grade-submission.sh /caminho/para/repo-do-aluno
+```
+
+O script imprime nota por critério STRIDE (0,5 cada) + integridade (`npm test`) e o total / 4,0.  
+No Windows, se não houver Semgrep/Python, usa automaticamente o fallback Node (`scripts/grade-security-check.cjs`).
+
+No Cursor, com este projeto aberto, cole o link e peça: **Corrigir entrega STRIDE: \<url\>**
 
 ---
 
