@@ -79,7 +79,7 @@ No início:
 
 Depois das correções, os **dois** devem passar.
 
-> Se o Codespace abrir em **recovery mode**, apague-o e crie outro depois de atualizar o repositório. Não trabalhe em recovery mode.
+> Se o Codespace abrir em **recovery mode**, ou se `npm` não for encontrado, **apague** esse Codespace e crie outro. Recovery usa Alpine sem Node — Rebuild no mesmo Codespace não resolve.
 
 ### Comandos úteis
 
