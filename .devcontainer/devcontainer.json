@@ -1,10 +1,9 @@
 {
   "name": "Atividade STRIDE",
   "image": "mcr.microsoft.com/devcontainers/typescript-node:20",
-  "postCreateCommand": "npm install && (python3 -m pip install --user --break-system-packages semgrep || pip3 install --user --break-system-packages semgrep || true)",
+  "postCreateCommand": "npm install && (sudo python3 -m pip install --break-system-packages semgrep || true)",
   "remoteEnv": {
-    "JWT_SECRET": "dev-secret-codespace-stride",
-    "PATH": "${containerEnv:PATH}:/home/node/.local/bin"
+    "JWT_SECRET": "dev-secret-codespace-stride"
   },
   "customizations": {
     "vscode": {
