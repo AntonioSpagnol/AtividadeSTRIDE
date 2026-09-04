@@ -79,6 +79,8 @@ No início:
 
 Depois das correções, os **dois** devem passar.
 
+> Se o Codespace abrir em **recovery mode**, apague-o e crie outro depois de atualizar o repositório. Não trabalhe em recovery mode.
+
 ### Comandos úteis
 
 | Comando | Para quê? |
